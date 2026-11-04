@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>∇ Descent — Loss Landscape</title>
+<link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
+<link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;600;800&display=swap)" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-shapes"><i class="c"></i><i class="s"></i><i class="t"></i></div>
+  <div id="segs"></div>
+  <p id="pct">00</p>
+</div>
+
+<canvas id="stars"></canvas>
+
+<!-- HEADER -->
+<header class="top">
+  <div class="logo"><span class="sq"></span>∇ DESCENT</div>
+  <nav>
+    <a href="#steps" data-i18n="nav_steps">Steps</a>
+    <a href="#lab" data-i18n="nav_lab">Landscape</a>
+  </nav>
+  <div class="ctrl">
+    <div class="accents">
+      <button class="sw" data-c="#e63946" style="--c:#e63946" aria-label="red"></button>
+      <button class="sw" data-c="#1d4ed8" style="--c:#1d4ed8" aria-label="blue"></button>
+      <button class="sw" data-c="#f4b400" style="--c:#f4b400" aria-label="yellow"></button>
+      <label class="sw pick" aria-label="custom"><input type="color" id="accentPick" value="#ff2d75"></label>
+    </div>
+    <button id="langBtn" class="btn">FR</button>
+    <button id="themeBtn" class="btn icon" aria-label="theme">
+      <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><g stroke-width="2"><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>
+      <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-txt reveal">
+      <p class="tag" data-i18n="hero_tag">NumPy · Matplotlib · from scratch</p>
+      <h1 data-i18n="hero_t">Watching gradient descent<br>find its way down.</h1>
+      <p class="lead" data-i18n="hero_s">A 337-parameter network, written without any ML library, trained, then projected onto the 2D plane where it moved the most.</p>
+      <a href="#lab" class="cta" data-i18n="hero_cta">See the landscape ↓</a>
+    </div>
+    <div class="bauhaus reveal">
+      <div class="b-circle"></div><div class="b-square"></div>
+      <div class="b-tri"></div><div class="b-bar"></div><div class="b-half"></div>
+    </div>
+  </section>
+
+  <!-- STEPS -->
+  <section id="steps" class="steps">
+    <article class="step reveal"><span class="num">01</span><div>
+      <h2 data-i18n="s1_t">Data</h2>
+      <p data-i18n="s1_p">Two interleaved half-moons, 400 noisy points. No straight line separates them, so the model needs hidden layers to bend the decision boundary.</p>
+    </div></article>
+
+    <article class="step reveal"><span class="num">02</span><div>
+      <h2 data-i18n="s2_t">Forward pass</h2>
+      <p data-i18n="s2_p">2 → 16 → 16 → 1. Tanh in the hidden layers, sigmoid at the output, binary cross-entropy as the loss. Every weight lives in one flat vector θ.</p>
+<pre><code>h1 = tanh(X·W1 + b1)
+h2 = tanh(h1·W2 + b2)
+p  = σ(h2·W3 + b3)
+L  = −mean( y·log p + (1−y)·log(1−p) )</code></pre>
+    </div></article>
+
+    <article class="step reveal"><span class="num">03</span><div>
+      <h2 data-i18n="s3_t">Backpropagation</h2>
+      <p data-i18n="s3_p">The chain rule, applied layer by layer from the loss back to the input. Sigmoid + cross-entropy simplify to <b>p − y</b>. The analytic gradient is checked against finite differences before training.</p>
+<pre><code>dz  = (p − y) / n
+dW3 = h2ᵀ·dz
+dh2 = dz·W3ᵀ ⊙ (1 − h2²)
+…   same pattern down to W1</code></pre>
+    </div></article>
+
+    <article class="step reveal"><span class="num">04</span><div>
+      <h2 data-i18n="s4_t">Gradient descent</h2>
+      <p data-i18n="s4_p">Full batch, θ ← θ − η∇L, for 1500 steps. A snapshot of θ is saved every 10 steps: that sequence is the path.</p>
+    </div></article>
+
+    <article class="step reveal"><span class="num">05</span><div>
+      <h2 data-i18n="s5_t">Projecting 337 dimensions to 2</h2>
+      <p data-i18n="s5_p">PCA on the snapshots (θₜ − θ*) gives the two directions δ₁, δ₂ where the optimizer moved the most. The loss is then evaluated on a 41×41 grid: L(θ* + αδ₁ + βδ₂).</p>
+    </div></article>
+
+    <article class="step reveal"><span class="num">06</span><div>
+      <h2 data-i18n="s6_t">Reading the result</h2>
+      <p data-i18n="s6_p">A steep first drop, then a slow slide along a flat valley toward the minimum. It is a slice: real curvature in the other 335 dimensions stays hidden.</p>
+    </div></article>
+  </section>
+
+  <!-- LAB -->
+  <section id="lab" class="lab">
+    <h2 class="sec-t reveal" data-i18n="lab_t">The landscape</h2>
+
+    <div class="stats reveal">
+      <button class="stat" data-pop="acc"><b id="stAcc">–</b><span data-i18n="st_acc">accuracy</span></button>
+      <button class="stat" data-pop="evr"><b id="stEvr">–</b><span data-i18n="st_evr">path variance in 2 PCs</span></button>
+      <button class="stat" data-pop="params"><b id="stPar">–</b><span data-i18n="st_par">parameters</span></button>
+    </div>
+
+    <div class="card big reveal">
+      <div class="card-h">
+        <h3 data-i18n="c3d_t">3D surface — drag to rotate</h3>
+        <button class="info" data-pop="surface">i</button>
+      </div>
+      <canvas id="c3d"></canvas>
+      <div class="legend">
+        <button data-pop="surface"><i class="lg-grad"></i><span data-i18n="lg_surf">loss surface</span></button>
+        <button data-pop="path"><i class="lg-line"></i><span data-i18n="lg_path">descent path</span></button>
+        <button data-pop="end"><i class="lg-star">★</i><span data-i18n="lg_min">minimum θ*</span></button>
+        <button id="replay" class="replay" data-i18n="replay">↻ replay</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card reveal">
+        <div class="card-h">
+          <h3 data-i18n="c2d_t">Top view — contour levels</h3>
+          <button class="info" data-pop="heat">i</button>
+        </div>
+        <div class="wrap"><canvas id="c2d"></canvas>
+          <button class="hot" id="hotStart" data-pop="start"></button>
+          <button class="hot star" id="hotEnd" data-pop="end"></button>
+        </div>
+      </div>
+      <div class="card reveal">
+        <div class="card-h">
+          <h3 data-i18n="cl_t">Loss over training</h3>
+          <button class="info" data-pop="curve">i</button>
+        </div>
+        <div class="wrap"><canvas id="cl"></canvas></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer><span class="sq"></span> NumPy · Matplotlib · HTML · CSS · JS</footer>
+
+<div id="tip"></div>
+<div id="modal"><div class="m-box">
+  <div class="m-shape"></div>
+  <h4 id="mT"></h4><p id="mB"></p>
+  <button id="mClose" class="btn">✕</button>
+</div></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
